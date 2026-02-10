@@ -177,24 +177,26 @@ except Exception:
 
 # IMPORT GROQ SEGURO PARA PANTALLA 8, ANTES DE USO
 # Cerca de la línea 190, donde está tu bloque de inicialización
-from api_ia import ApiIa  # Esto es vital para que reconozca la clase
 
+
+API_IA = None
 HAS_GROQ = False
-if "API_IA" not in st.session_state:
+try:
+    from groq import Groq
+    from api_ia import ApiIa  # Esto es vital para que reconozca la clase
+    # Marcamos variable de obtencion e inicializamos groq con la API key guardada en secrets.toml para pantalla 8
+    api_key = st.secrets.get("groq_api_key")
     
-    try:
-        api_key = st.secrets.get("groq_api_key")
-        if api_key:
-            from groq import Groq
-            client_groq = Groq(api_key=api_key)
-            # Aquí creamos la instancia
-            st.session_state["API_IA"] = ApiIa(client_groq) 
-            st.session_state["HAS_GROQ"] = True
-        else:
-            st.session_state["HAS_GROQ"] = False
-    except Exception as e:
-        st.error(f"Error al cargar la IA: {e}")
-        st.session_state["HAS_GROQ"] = False
+    if api_key:
+        client_groq = Groq(api_key=api_key)
+        API_IA = ApiIa(client_groq)
+        HAS_GROQ = True
+    else:
+        HAS_GROQ = False
+except Exception:
+    # Sino tiene la libreria se inicializa de todos modos como falso en obtencion y nulo en valor
+    HAS_GROQ = False
+
 
 # ======================== FIN IMPORTS ===========================================
 # --- 🕵️ BLOQUE DE DIAGNÓSTICO (BORRAR AL FINAL) ---
