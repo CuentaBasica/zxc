@@ -38,7 +38,7 @@ class ApiIa:
 
     def generate_ia_resume(self,text_document: str,
                             model="openai/gpt-oss-20b",
-                            temperature=0.5,
+                            temperature=0.3,
                             max_completion_tokens=2000,
                             ):
         '''
@@ -138,22 +138,32 @@ class ApiIa:
         return re.sub(chk_pattern, "", ia_resume).strip()
     
     def chat_interactivo(self, mensaje_usuario, historial_mensajes, texto_documento):
-        # Usamos el modelo openai/gpt-oss-120b que tienes activo
-        model = "openai/gpt-oss-120b"
-        contexto = texto_documento[:15000]
         
-        messages = [
-            {"role": "system", "content": f"Eres un auditor de construcción. Base: {contexto}"}
-        ]
-        # Añadir historial para tener memoria
+        model = "openai/gpt-oss-120b"
+        # Limitamos el contexto para no exceder la ventana de tokens (aprox 12k chars de seguridad)
+        contexto = texto_documento[:15000] 
+        
+        # Definimos el comportamiento: la IA DEBE responder en base al contexto
+        system_prompt = (
+            "Eres un experto Auditor de Construcción y Control de Calidad. "
+            "Tu tarea es responder dudas basándote EXCLUSIVAMENTE en la siguiente Especificación Técnica (EETT):\n\n"
+            f"--- INICIO DOCUMENTO ---\n{contexto}\n--- FIN DOCUMENTO ---\n\n"
+            "Si la información no está en el documento, dilo amablemente. Responde siempre en español."
+        )
+        
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Añadimos el historial previo (memoria del chat)
         for m in historial_mensajes:
             messages.append(m)
+            
+        # Añadimos la pregunta actual
         messages.append({"role": "user", "content": mensaje_usuario})
 
         response = self.client_groq.chat.completions.create(
             model=model,
             messages=messages,
-            temperature=0.2
+            temperature=0.2 # Baja temperatura para evitar alucinaciones
         )
         return response.choices[0].message.content
-    
+        

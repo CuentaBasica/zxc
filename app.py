@@ -3757,61 +3757,67 @@ def render_pantalla_8_ia():
     # EXTRAE LA INSTANCIA DE LA SESIÓN (Soluciona el NameError)
     API_IA_INSTANCIA = st.session_state.get("API_IA")
 
+    # 1. RECUPERAR INSTANCIA DE IA
+    API_IA_INSTANCIA = st.session_state.get("API_IA")
+
     if API_IA_INSTANCIA is None:
         st.error("❌ El motor de IA no está inicializado. Revisa la configuración al inicio de la app.")
         st.stop()
 
-    # USA LA INSTANCIA RECUPERADA
+    # 2. INTENTO DE RESUMEN Y CHECKLIST
+    # ia_content es lo que traemos de la base de datos de la IA
     ia_content = API_IA_INSTANCIA.check_resumen_ia(id_generated)
 
     if ia_content == "":
-        ia_resume = API_IA_INSTANCIA.generate_ia_resume(text)
-        checkboxes = API_IA_INSTANCIA.generate_checkboxes(ia_resume)
-        st.markdown(ia_content)
-        create_checkboxes(id_generated, checkboxes)
+        # Si no hay resumen previo, lo generamos usando el texto extraído (variable 'text')
+        with st.spinner("Generando análisis inicial con IA..."):
+            ia_resume = API_IA_INSTANCIA.generate_ia_resume(text)
+            st.markdown(ia_resume)
+            
+            # Generamos los checkboxes interactivos
+            checkboxes = API_IA_INSTANCIA.generate_checkboxes(ia_resume)
+            create_checkboxes(id_generated, checkboxes)
     else:
-        # Significa que hubo un error, en ese caso mostramos el detalle
-        st.error(ia_content)
-        st.stop()
+        # Si ya existía, mostramos el contenido guardado
+        st.markdown(ia_content)
+        checkboxes = API_IA_INSTANCIA.generate_checkboxes(ia_content)
+        create_checkboxes(id_generated, checkboxes)
 
-    # --- Al final de render_pantalla_8_ia ---
+    # --- 3. CHAT INTERACTIVO SOBRE EL DOCUMENTO ---
     st.markdown("---")
     st.subheader("💬 Chat Consultor de EETT")
+    st.caption("Pregunta sobre tolerancias, materiales o normativas específicas de este documento.")
 
-    # Recuperar instancia de forma segura
-    ia_instancia = st.session_state.get("API_IA")
+    # Inicializar historial de chat si no existe
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
-    if ia_instancia:
-        # Inicializar historial si no existe
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
+    # Mostrar los mensajes que ya existen en el historial
+    for message in st.session_state.chat_history:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-        # Mostrar burbujas de chat
-        for message in st.session_state.chat_history:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+    # Entrada de nueva pregunta del usuario
+    if pregunta := st.chat_input("Escribe tu duda aquí..."):
+        # Añadimos la pregunta al historial y la mostramos
+        st.session_state.chat_history.append({"role": "user", "content": pregunta})
+        with st.chat_message("user"):
+            st.markdown(pregunta)
 
-        # Entrada del usuario
-        if pregunta := st.chat_input("Escribe tu duda sobre este documento..."):
-            st.session_state.chat_history.append({"role": "user", "content": pregunta})
-            with st.chat_message("user"):
-                st.markdown(pregunta)
-
-            with st.chat_message("assistant"):
-                with st.spinner("Consultando al experto..."):
-                    # Llamada al método de chat_interactivo
-                    # Nota: 'text' debe ser la variable que contiene el OCR previo
-                    respuesta = ia_instancia.chat_interactivo(
-                        pregunta, 
-                        st.session_state.chat_history[:-1], 
-                        text 
-                    )
-                    st.markdown(respuesta)
-            
-            st.session_state.chat_history.append({"role": "assistant", "content": respuesta})
-    else:
-        st.warning("⚠️ El motor de IA no está disponible en este momento. Intenta recargar la página.")
-
+        # Generamos la respuesta de la IA
+        with st.chat_message("assistant"):
+            with st.spinner("Revisando el documento..."):
+                # IMPORTANTE: Pasamos 'text' (el OCR/Word) para que la IA sepa qué responder
+                respuesta = API_IA_INSTANCIA.chat_interactivo(
+                    pregunta, 
+                    st.session_state.chat_history[:-1], 
+                    text 
+                )
+                st.markdown(respuesta)
+        
+        # Guardamos la respuesta y refrescamos para mantener el orden
+        st.session_state.chat_history.append({"role": "assistant", "content": respuesta})
+        st.rerun()
 
 
 
