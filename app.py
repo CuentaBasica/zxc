@@ -3749,39 +3749,43 @@ def render_pantalla_8_ia():
         st.error(ia_content)
         st.stop()
 
+    # --- Al final de render_pantalla_8_ia ---
     st.markdown("---")
     st.subheader("💬 Chat Consultor de EETT")
-    st.caption("Hazle preguntas específicas al documento (ej: ¿Cuáles son las tolerancias de compactación?)")
 
-    # Inicializar el historial del chat en la sesión si no existe
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+    # Recuperar instancia de forma segura
+    ia_instancia = st.session_state.get("API_IA")
 
-    # Mostrar mensajes previos
-    for message in st.session_state.chat_history:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    if ia_instancia:
+        # Inicializar historial si no existe
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
 
-    # Entrada de texto del usuario
-    if pregunta := st.chat_input("Escribe tu duda sobre este documento..."):
-        # Agregar mensaje del usuario al historial
-        st.session_state.chat_history.append({"role": "user", "content": pregunta})
-        with st.chat_message("user"):
-            st.markdown(pregunta)
+        # Mostrar burbujas de chat
+        for message in st.session_state.chat_history:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
-        # Generar respuesta de la IA
-        with st.chat_message("assistant"):
-            with st.spinner("Pensando..."):
-                # 'text' es la variable que ya contiene el OCR del PDF o el texto del Word
-                respuesta_ia = st.session_state["API_IA"].chat_interactivo(
-                    pregunta, 
-                    st.session_state.chat_history[:-1], # Pasamos el historial previo
-                    text 
-                )
-                st.markdown(respuesta_ia)
-        
-        # Guardar respuesta de la IA
-        st.session_state.chat_history.append({"role": "assistant", "content": respuesta_ia})
+        # Entrada del usuario
+        if pregunta := st.chat_input("Escribe tu duda sobre este documento..."):
+            st.session_state.chat_history.append({"role": "user", "content": pregunta})
+            with st.chat_message("user"):
+                st.markdown(pregunta)
+
+            with st.chat_message("assistant"):
+                with st.spinner("Consultando al experto..."):
+                    # Llamada al método de chat_interactivo
+                    # Nota: 'text' debe ser la variable que contiene el OCR previo
+                    respuesta = ia_instancia.chat_interactivo(
+                        pregunta, 
+                        st.session_state.chat_history[:-1], 
+                        text 
+                    )
+                    st.markdown(respuesta)
+            
+            st.session_state.chat_history.append({"role": "assistant", "content": respuesta})
+    else:
+        st.warning("⚠️ El motor de IA no está disponible en este momento. Intenta recargar la página.")
 
 
 

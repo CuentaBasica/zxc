@@ -137,32 +137,23 @@ class ApiIa:
         # Elimina el bloque [ ... ] completo (y lo que contenga)
         return re.sub(chk_pattern, "", ia_resume).strip()
     
-def chat_interactivo(self, mensaje_usuario, historial_mensajes, texto_documento, model="openai/gpt-oss-120b"):
-        """
-        Permite conversar con el documento. 
-        Mantiene el contexto del texto extraído y el historial.
-        """
-        # Limitamos el texto del documento para no saturar el contexto
-        contexto_doc = texto_documento[:15000] 
+    def chat_interactivo(self, mensaje_usuario, historial_mensajes, texto_documento):
+        # Usamos el modelo openai/gpt-oss-120b que tienes activo
+        model = "openai/gpt-oss-120b"
+        contexto = texto_documento[:15000]
         
-        system_prompt = f"Eres un auditor experto en construcción. Responde dudas basadas en este texto:\n\n{contexto_doc}"
-        
-        # Construimos el payload de mensajes
-        messages = [{"role": "system", "content": system_prompt}]
-        
-        # Añadimos el historial previo (memoria del chat)
-        for msg in historial_mensajes:
-            messages.append(msg)
-            
-        # Añadimos la pregunta actual
+        messages = [
+            {"role": "system", "content": f"Eres un auditor de construcción. Base: {contexto}"}
+        ]
+        # Añadir historial para tener memoria
+        for m in historial_mensajes:
+            messages.append(m)
         messages.append({"role": "user", "content": mensaje_usuario})
-        
-        try:
-            response = self.client_groq.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=0.2, # Menos creativo para evitar alucinaciones
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            return f"Error en el chat: {str(e)}"
+
+        response = self.client_groq.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=0.2
+        )
+        return response.choices[0].message.content
+    
