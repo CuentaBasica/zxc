@@ -3610,7 +3610,7 @@ def render_pantalla_8_ia():
     if df is None or df.empty:
         st.info("No hay documentos en la biblioteca EETT. Sube uno en Pantalla 7.")
         return
-    if not HAS_GROQ:
+    if not st.session_state.get("HAS_GROQ", False):
         st.error(
             "Groq no está instalado en el proyecto, es necesario para este modulo de analisis mediante IA")
         st.error(
