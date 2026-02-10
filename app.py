@@ -3859,9 +3859,9 @@ def densidades_doc_eett_selector():
         st.info("No hay documentos EETT vigentes cargados")
         return None
 
-    labels = ["— Sin documento asociado —"] + [o[1] for o in opciones]
+    labels = ["— Seleccione un documento —"] + [o[1] for o in opciones]
     values = [None] + [o[0] for o in opciones]
-
+    
     seleccion = st.selectbox(
         "Documento Técnico Asociado (EETT)",
         options=list(range(len(values))),
