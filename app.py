@@ -185,26 +185,28 @@ HAS_GROQ = False
 
 # No definas HAS_GROQ = False aquí si luego usas el de session_state, 
 # puede crear confusión de "ámbito" (scope).
+# --- INICIALIZACIÓN ROBUSTA DE IA ---
+if "HAS_GROQ" not in st.session_state:
+    st.session_state["HAS_GROQ"] = False
 
 if "API_IA" not in st.session_state or st.session_state["API_IA"] is None:
     try:
-        # Intentamos importar la librería antes de cualquier cosa
-        from groq import Groq 
-        
+        from groq import Groq
         api_key = st.secrets.get("groq_api_key")
+        
         if api_key:
             client_groq = Groq(api_key=api_key)
+            # Asegúrate que ApiIa esté importado arriba: from api_ia import ApiIa
             st.session_state["API_IA"] = ApiIa(client_groq)
             st.session_state["HAS_GROQ"] = True
         else:
-            st.error("🔑 No se encontró 'groq_api_key' en st.secrets")
-            st.session_state["HAS_GROQ"] = False
-    except ImportError:
-        st.error("📦 Error: La librería 'groq' no está instalada. Ejecuta 'pip install groq'")
-        st.session_state["HAS_GROQ"] = False
+            st.warning("⚠️ No se encontró la clave 'groq_api_key' en st.secrets.")
     except Exception as e:
-        st.error(f"❌ Error inesperado: {e}")
         st.session_state["HAS_GROQ"] = False
+        st.error(f"❌ Error al conectar con Groq: {e}")
+
+# Esto crea un alias para que tus funciones viejas que usan HAS_GROQ no mueran
+HAS_GROQ = st.session_state["HAS_GROQ"]
 
 
 # ======================== FIN IMPORTS ===========================================
