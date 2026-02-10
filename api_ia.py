@@ -148,7 +148,6 @@ class ApiIa:
             "Eres un experto Auditor de Construcción y Control de Calidad. "
             "Tu tarea es responder dudas basándote EXCLUSIVAMENTE en la siguiente Especificación Técnica (EETT):\n\n"
             f"--- INICIO DOCUMENTO ---\n{contexto}\n--- FIN DOCUMENTO ---\n\n"
-            "Si la información no está en el documento, dilo amablemente. Responde siempre en español."
         )
         
         messages = [{"role": "system", "content": system_prompt}]
