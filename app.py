@@ -3811,16 +3811,13 @@ def render_pantalla_8_ia():
                 respuesta = API_IA_INSTANCIA.chat_interactivo(
                     pregunta, 
                     st.session_state.chat_history[:-1], 
-                    text 
+                    ia_resume #asdasdsadasdasaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                 )
                 st.markdown(respuesta)
         
         # Guardamos la respuesta y refrescamos para mantener el orden
         st.session_state.chat_history.append({"role": "assistant", "content": respuesta})
         st.rerun()
-
-
-
 
 # =========================================================
 # ==============  ROUTER NUEVAS PANTALLAS 7/8  =============
@@ -3854,7 +3851,6 @@ def get_eett_catalog_vigente():
     except Exception:
         return []
 
-
 def densidades_doc_eett_selector():
     """
     Selector opcional de Documento Técnico (EETT)
@@ -3885,5 +3881,3 @@ def densidades_attach_doc_eett(df):
     if "DocID_EETT" not in df.columns:
         df["DocID_EETT"] = None
     return df
-
-
