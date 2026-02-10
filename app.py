@@ -3811,7 +3811,7 @@ def render_pantalla_8_ia():
                 respuesta = API_IA_INSTANCIA.chat_interactivo(
                     pregunta, 
                     st.session_state.chat_history[:-1], 
-                    text 
+                    ia_content
                 )
                 st.markdown(respuesta)
         
