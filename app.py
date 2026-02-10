@@ -3741,18 +3741,22 @@ def render_pantalla_8_ia():
             chk_key = f"{id_generated}_chk_{index}"
             st.checkbox(chk_text if chk_key not in revisiones else f"~~{chk_text.strip()}~~",key=chk_key,on_change=callback_chk_box,args=(chk_key,),value=True if chk_key in revisiones else False)
 
+
     id_generated = Path(abs_path).name
-    ia_content = API_IA.check_resumen_ia(id_generated)
-    if ia_content =="":
-        ia_resume = API_IA.generate_ia_resume(text)
-        checkboxes = API_IA.generate_checkboxes(ia_resume)
-        API_IA.save_resume_ia(ia_resume,id_generated)
-        ia_resume = API_IA.clean_checkboxes(ia_resume)
-        st.markdown(ia_resume)
-        create_checkboxes(id_generated,checkboxes)
-    elif "❌" not in ia_content:
-        checkboxes = API_IA.generate_checkboxes(ia_content)
-        ia_content = API_IA.clean_checkboxes(ia_content)
+
+    # EXTRAE LA INSTANCIA DE LA SESIÓN (Soluciona el NameError)
+    API_IA_INSTANCIA = st.session_state.get("API_IA")
+
+    if API_IA_INSTANCIA is None:
+        st.error("❌ El motor de IA no está inicializado. Revisa la configuración al inicio de la app.")
+        st.stop()
+
+    # USA LA INSTANCIA RECUPERADA
+    ia_content = API_IA_INSTANCIA.check_resumen_ia(id_generated)
+
+    if ia_content == "":
+        ia_resume = API_IA_INSTANCIA.generate_ia_resume(text)
+        checkboxes = API_IA_INSTANCIA.generate_checkboxes(ia_resume)
         st.markdown(ia_content)
         create_checkboxes(id_generated, checkboxes)
     else:
