@@ -33,8 +33,8 @@ class ApiIa:
     
    '''
 
-    def __init__(self,client_groq):
-        self.client_groq = client_groq
+    def __init__(self, client_groq):
+        self.client_groq = client_groq  
 
     def generate_ia_resume(self,text_document: str,
                             model="openai/gpt-oss-20b",
