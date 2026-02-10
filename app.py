@@ -3744,6 +3744,16 @@ def render_pantalla_8_ia():
 
     id_generated = Path(abs_path).name
 
+    if "current_doc_id" not in st.session_state:
+        st.session_state["current_doc_id"] = id_generated
+
+    # Si el ID guardado es diferente al actual, limpiamos el historial
+    if st.session_state["current_doc_id"] != id_generated:
+        st.session_state["chat_history"] = []
+        st.session_state["current_doc_id"] = id_generated
+        # Opcional: Mostrar un aviso rápido
+        st.toast(f"Cambiando contexto a: {id_generated}", icon="🔄")
+
     # EXTRAE LA INSTANCIA DE LA SESIÓN (Soluciona el NameError)
     API_IA_INSTANCIA = st.session_state.get("API_IA")
 
