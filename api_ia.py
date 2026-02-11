@@ -137,11 +137,11 @@ class ApiIa:
         # Elimina el bloque [ ... ] completo (y lo que contenga)
         return re.sub(chk_pattern, "", ia_resume).strip()
     
-    def chat_interactivo(self, mensaje_usuario, historial_mensajes, ia_resume1):
+    def chat_interactivo(self, mensaje_usuario, historial_mensajes, ia_contenido):
         
         model = "openai/gpt-oss-120b"
         # Limitamos el contexto para no exceder la ventana de tokens (aprox 12k chars de seguridad)
-        contexto = ia_resume1
+        contexto = ia_contenido
         
         # Definimos el comportamiento: la IA DEBE responder en base al contexto
         system_prompt = (

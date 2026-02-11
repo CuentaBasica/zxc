@@ -3808,11 +3808,11 @@ def render_pantalla_8_ia():
         with st.chat_message("assistant"):
             with st.spinner("Revisando el documento..."):
                 # IMPORTANTE: Pasamos 'text' (el OCR/Word) para que la IA sepa qué responder
-                ia_resume = API_IA_INSTANCIA.generate_ia_resume(text)
+#                ia_resume = API_IA_INSTANCIA.generate_ia_resume(text)
                 respuesta = API_IA_INSTANCIA.chat_interactivo(
                     pregunta,
                     st.session_state.chat_history[:-1],
-                    ia_resume
+                    ia_content
                 )
                 st.markdown(respuesta)
         
