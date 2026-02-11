@@ -3767,6 +3767,7 @@ def render_pantalla_8_ia():
     # 2. INTENTO DE RESUMEN Y CHECKLIST
     # ia_content es lo que traemos de la base de datos de la IA
     ia_content = API_IA_INSTANCIA.check_resumen_ia(id_generated)
+    chat_ia = ia_content
 
     if ia_content == "":
         # Si no hay resumen previo, lo generamos usando el texto extraído (variable 'text')
@@ -3776,10 +3777,12 @@ def render_pantalla_8_ia():
             
             # Generamos los checkboxes interactivos
             checkboxes = API_IA_INSTANCIA.generate_checkboxes(ia_resume)
+            chat_ia = ia_resume
             create_checkboxes(id_generated, checkboxes)
     else:
         # Si ya existía, mostramos el contenido guardado
         st.markdown(ia_content)
+        chat_ia = ia_content
         checkboxes = API_IA_INSTANCIA.generate_checkboxes(ia_content)
         create_checkboxes(id_generated, checkboxes)
 
@@ -3812,7 +3815,7 @@ def render_pantalla_8_ia():
                 respuesta = API_IA_INSTANCIA.chat_interactivo(
                     pregunta,
                     st.session_state.chat_history[:-1],
-                    ia_content
+                    chat_ia
                 )
                 st.markdown(respuesta)
         
