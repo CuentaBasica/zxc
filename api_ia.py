@@ -142,7 +142,6 @@ class ApiIa:
         model = "openai/gpt-oss-120b"
         # Limitamos el contexto para no exceder la ventana de tokens (aprox 12k chars de seguridad)
         contexto = str(ia_contenido)
-        print(ia_contenido)
         
         # Definimos el comportamiento: la IA DEBE responder en base al contexto
         system_prompt = (
